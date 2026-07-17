@@ -1,0 +1,474 @@
+/* ===== מסך יעד חיסכון — ערכה כהה קבועה (מיועד לטלוויזיה בחדר) ===== */
+
+:root {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid: #2c2c2a;
+  --baseline: #383835;
+  --border: rgba(255, 255, 255, 0.10);
+  --accent: #eda100;        /* זהב — צבע הכסף של המסך */
+  --accent-deep: #c98500;
+  --accent-bright: #f5c04e;
+  --good: #0ca30c;
+  --danger: #d03b3b;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.view.hidden, .hidden { display: none !important; }
+
+/* ============================================================
+   תצוגת טלוויזיה
+   ============================================================ */
+
+#tv {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  cursor: none;
+}
+
+#tv-drift {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 3.5vmin 4vmin;
+  transition: transform 12s ease-in-out;
+}
+
+/* ---- שורה עליונה: שעון + נתוני קצב ---- */
+
+.tv-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.clock-block #clock {
+  font-size: 6vmin;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.clock-block #date {
+  font-size: 2.4vmin;
+  color: var(--text-secondary);
+  margin-top: 0.8vmin;
+}
+
+.stats-block {
+  display: flex;
+  gap: 5vmin;
+  text-align: left;
+}
+
+.stat { display: flex; flex-direction: column; align-items: flex-end; }
+
+.stat-label {
+  font-size: 1.9vmin;
+  color: var(--text-muted);
+  margin-bottom: 0.6vmin;
+}
+
+.stat-value {
+  font-size: 3.2vmin;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ---- מרכז: הטבעת ---- */
+
+.tv-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  gap: 3vmin;
+}
+
+.ring-wrap {
+  position: relative;
+  width: 52vmin;
+  height: 52vmin;
+}
+
+#ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+.ring-track {
+  fill: none;
+  stroke: var(--grid);
+  stroke-width: 9;
+}
+
+.ring-fill {
+  fill: none;
+  stroke: url(#ring-grad);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dasharray: 552.92;   /* 2πr, r=88 */
+  stroke-dashoffset: 552.92;
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ring-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1vmin;
+  padding: 8vmin;
+}
+
+.goal-name {
+  font-size: 2.2vmin;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+.hero {
+  font-size: 7.4vmin;
+  font-weight: 700;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.percent {
+  font-size: 2.8vmin;
+  color: var(--accent-bright);
+  font-weight: 600;
+}
+
+.level-name {
+  font-size: 2.1vmin;
+  color: var(--text-secondary);
+}
+
+/* ---- פס תחנות ---- */
+
+.milestones {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  direction: rtl;
+}
+
+.ms {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vmin;
+  width: 11vmin;
+  position: relative;
+}
+
+.ms-dot {
+  width: 2.2vmin;
+  height: 2.2vmin;
+  border-radius: 50%;
+  background: var(--grid);
+  border: 0.35vmin solid var(--baseline);
+  z-index: 1;
+  transition: background 0.6s, border-color 0.6s, box-shadow 0.6s;
+}
+
+.ms.done .ms-dot {
+  background: var(--accent);
+  border-color: var(--accent-bright);
+  box-shadow: 0 0 1.6vmin rgba(237, 161, 0, 0.55);
+}
+
+.ms.current .ms-dot {
+  border-color: var(--accent-bright);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(237, 161, 0, 0.5); }
+  50%      { box-shadow: 0 0 0 1.2vmin rgba(237, 161, 0, 0); }
+}
+
+/* קו מחבר בין תחנות — הפריטים זורמים ימין→שמאל (RTL),
+   לכן הקו נמתח ימינה, אל התחנה הקודמת */
+.ms::before {
+  content: "";
+  position: absolute;
+  top: 0.95vmin;
+  left: 50%;
+  width: 100%;
+  height: 0.35vmin;
+  background: var(--grid);
+}
+.ms:first-child::before { display: none; }
+.ms.done::before { background: var(--accent-deep); }
+
+.ms-label {
+  font-size: 1.9vmin;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.ms.done .ms-label { color: var(--text-secondary); }
+.ms.current .ms-label { color: var(--accent-bright); }
+
+.ms-star { font-size: 1.7vmin; line-height: 1; margin-top: -0.4vmin; }
+
+/* ---- שורה תחתונה: גרף + ציטוט ---- */
+
+.tv-bottom {
+  display: flex;
+  align-items: stretch;
+  gap: 3vmin;
+  height: 17vmin;
+}
+
+.spark-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1.4vmin;
+  padding: 1.6vmin 2vmin;
+  width: 38vmin;
+  min-width: 30vmin;
+  display: flex;
+  flex-direction: column;
+}
+
+.spark-title {
+  font-size: 1.8vmin;
+  color: var(--text-muted);
+  margin-bottom: 0.8vmin;
+}
+
+.spark-holder { flex: 1; min-height: 0; }
+#spark { width: 100%; height: 100%; display: block; overflow: visible; direction: ltr; }
+
+.spark-tip {
+  position: absolute;
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 0.8vmin;
+  padding: 0.7vmin 1.1vmin;
+  font-size: 1.7vmin;
+  color: var(--text-primary);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+}
+.spark-tip .tip-date { color: var(--text-muted); font-size: 1.5vmin; }
+
+.quote-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 1.2vmin;
+}
+
+.quote {
+  font-size: 2.9vmin;
+  color: var(--text-secondary);
+  font-weight: 500;
+  line-height: 1.45;
+  max-width: 60vw;
+  transition: opacity 1.2s ease;
+}
+.quote.fading { opacity: 0; }
+
+.sync-state { font-size: 1.6vmin; color: var(--text-muted); }
+
+/* ---- חגיגת תחנה ---- */
+
+.celebrate {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 13, 13, 0.72);
+  z-index: 40;
+  animation: fadeIn 0.5s ease;
+}
+
+.celebrate-text {
+  font-size: 7vmin;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.3;
+  color: var(--accent-bright);
+  text-shadow: 0 0 4vmin rgba(237, 161, 0, 0.45);
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* ============================================================
+   תצוגת עריכה (טלפון)
+   ============================================================ */
+
+#edit {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-header { text-align: center; padding: 16px 0 4px; }
+
+.edit-label { color: var(--text-muted); font-size: 15px; }
+
+.edit-total {
+  font-size: 44px;
+  font-weight: 700;
+  margin: 6px 0 4px;
+}
+
+.edit-sub { color: var(--text-secondary); font-size: 15px; margin-bottom: 14px; }
+
+.edit-bar {
+  height: 10px;
+  background: var(--grid);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.edit-bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 5px;
+  background: linear-gradient(to left, #c98500, #f5c04e);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.card h2 { font-size: 16px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600; }
+
+.seg {
+  display: flex;
+  background: var(--page);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 16px;
+  gap: 4px;
+}
+
+.seg-btn {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.seg-btn.active {
+  background: var(--surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.field { display: block; margin-bottom: 14px; }
+.field span { display: block; font-size: 14px; color: var(--text-secondary); margin-bottom: 6px; }
+
+.field input {
+  width: 100%;
+  padding: 14px;
+  font-size: 20px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+}
+.field input:focus { border-color: var(--accent); }
+
+button.primary {
+  width: 100%;
+  padding: 15px;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: inherit;
+  color: #0d0d0d;
+  background: linear-gradient(to left, #c98500, #f5c04e);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+button.primary:active { transform: scale(0.98); }
+
+.entries { list-style: none; }
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.entry:last-child { border-bottom: none; }
+
+.entry-info { flex: 1; min-width: 0; }
+.entry-total { font-size: 17px; font-weight: 600; }
+.entry-date { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.entry-delta { font-size: 14px; font-weight: 600; color: var(--good); white-space: nowrap; }
+.entry-delta.neg { color: var(--danger); }
+
+.entry-del {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.entries-empty { color: var(--text-muted); font-size: 14px; text-align: center; padding: 8px 0; }
+
+.edit-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px;
+  font-size: 14px;
+}
+.edit-footer a { color: var(--accent-bright); text-decoration: none; }

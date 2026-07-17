@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>המיליון הראשון — היעד שלי</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+</head>
+<body>
+
+  <!-- ================= תצוגת טלוויזיה ================= -->
+  <div id="tv" class="view hidden">
+    <div id="tv-drift">
+      <header class="tv-top">
+        <div class="clock-block">
+          <div id="clock">--:--</div>
+          <div id="date"></div>
+        </div>
+        <div class="stats-block">
+          <div class="stat">
+            <span class="stat-label">קצב חודשי ממוצע</span>
+            <span class="stat-value" id="rate">—</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label" id="forecast-label">תחזית הגעה ליעד</span>
+            <span class="stat-value" id="forecast">—</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="tv-center">
+        <div class="ring-wrap">
+          <svg id="ring" viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <linearGradient id="ring-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#c98500"/>
+                <stop offset="100%" stop-color="#f5c04e"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="100" cy="100" r="88"/>
+            <circle class="ring-fill" id="ring-fill" cx="100" cy="100" r="88"/>
+          </svg>
+          <div class="ring-inner">
+            <div id="goal-name" class="goal-name"></div>
+            <div id="total" class="hero">₪0</div>
+            <div id="percent" class="percent"></div>
+            <div id="level-name" class="level-name"></div>
+          </div>
+        </div>
+        <div id="milestones" class="milestones"></div>
+      </main>
+
+      <footer class="tv-bottom">
+        <div class="spark-card">
+          <div class="spark-title">ההתקדמות שלי</div>
+          <div class="spark-holder"><svg id="spark"></svg></div>
+          <div id="spark-tip" class="spark-tip hidden"></div>
+        </div>
+        <div class="quote-block">
+          <div id="quote" class="quote"></div>
+          <div id="sync-state-tv" class="sync-state"></div>
+        </div>
+      </footer>
+    </div>
+    <div id="celebrate" class="celebrate hidden">
+      <div class="celebrate-text" id="celebrate-text"></div>
+    </div>
+  </div>
+
+  <!-- ================= תצוגת עריכה (טלפון) ================= -->
+  <div id="edit" class="view hidden">
+    <header class="edit-header">
+      <div class="edit-label">נחסך עד היום</div>
+      <div id="edit-total" class="edit-total">₪0</div>
+      <div id="edit-sub" class="edit-sub"></div>
+      <div class="edit-bar"><div id="edit-bar-fill" class="edit-bar-fill"></div></div>
+    </header>
+
+    <section class="card">
+      <div class="seg" role="tablist">
+        <button id="seg-deposit" class="seg-btn active" type="button">הפקדה חדשה</button>
+        <button id="seg-total" class="seg-btn" type="button">עדכון סכום כולל</button>
+      </div>
+      <form id="entry-form">
+        <label class="field">
+          <span id="amount-label">כמה הפקדת? (₪)</span>
+          <input id="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="5,000" required>
+        </label>
+        <label class="field">
+          <span>תאריך</span>
+          <input id="entry-date" type="date" required>
+        </label>
+        <button type="submit" class="primary">שמירה</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>היסטוריית עדכונים</h2>
+      <ul id="entries-list" class="entries"></ul>
+      <p id="entries-empty" class="entries-empty">עוד אין עדכונים. ההפקדה הראשונה שלך מתחילה את הדרך 🏠</p>
+    </section>
+
+    <footer class="edit-footer">
+      <a href="?mode=tv">📺 תצוגת טלוויזיה</a>
+      <span id="sync-state" class="sync-state"></span>
+    </footer>
+  </div>
+
+  <canvas id="confetti"></canvas>
+
+  <script src="config.js"></script>
+  <script src="quotes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
