@@ -12,6 +12,7 @@
   const fmtILS = new Intl.NumberFormat("he-IL", {
     style: "currency", currency: "ILS", maximumFractionDigits: 0,
   });
+  const fmtNum = new Intl.NumberFormat("he-IL", { maximumFractionDigits: 0 });
   const fmtDate = new Intl.DateTimeFormat("he-IL", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
@@ -198,7 +199,7 @@
       const p = Math.min((t - t0) / dur, 1);
       const ease = 1 - Math.pow(1 - p, 3);
       shownTotal = from + diff * ease;
-      $("total").textContent = fmtILS.format(Math.round(shownTotal));
+      $("total").textContent = fmtNum.format(Math.round(shownTotal));
       if (p < 1) countAnim = requestAnimationFrame(step);
     }
     countAnim = requestAnimationFrame(step);
@@ -225,7 +226,7 @@
       if (total < it.value && !currentMarked) { div.classList.add("current"); currentMarked = true; }
       div.innerHTML =
         `<div class="ms-dot"></div><div class="ms-label">${it.label}</div>` +
-        (it.star ? `<div class="ms-star">★</div>` : "");
+        (it.star ? `<div class="ms-star">🏠</div>` : "");
       holder.appendChild(div);
     }
   }
@@ -353,7 +354,7 @@
   function renderEdit() {
     const total = currentTotal();
     const lv = levelInfo(total);
-    $("edit-total").textContent = fmtILS.format(total);
+    $("edit-total-value").textContent = fmtNum.format(total);
 
     const nextMs = total < LEVEL
       ? cfg.milestones.find((m) => m > total) || LEVEL
@@ -389,6 +390,12 @@
 
   function setupEditForm() {
     $("entry-date").value = new Date().toISOString().slice(0, 10);
+
+    // עיצוב חי עם פסיקים בזמן הקלדה (5000 → 5,000)
+    $("amount").addEventListener("input", (ev) => {
+      const digits = ev.target.value.replace(/[^\d]/g, "");
+      ev.target.value = digits ? fmtNum.format(Number(digits)) : "";
+    });
 
     const segD = $("seg-deposit"), segT = $("seg-total");
     function setSeg(m) {

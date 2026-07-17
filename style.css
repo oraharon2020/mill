@@ -38,14 +38,24 @@ html, body {
   inset: 0;
   overflow: hidden;
   cursor: none;
+  background: radial-gradient(105vmin 90vmin at 50% 42%, #201a10 0%, var(--page) 62%);
+  box-shadow: inset 0 0 20vmin 3vmin rgba(0, 0, 0, 0.55);
 }
 
 #tv-drift {
+  position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
   padding: 3.5vmin 4vmin;
   transition: transform 12s ease-in-out;
+}
+
+/* קלף "זכוכית" משותף — משמש לכל הבלוקים הצפים (שעון, נתונים, גרף) */
+.glass {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)), var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1vmin 2.6vmin rgba(0, 0, 0, 0.35);
 }
 
 /* ---- שורה עליונה: שעון + נתוני קצב ---- */
@@ -54,6 +64,11 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+
+.clock-block {
+  padding: 1.6vmin 2.6vmin;
+  border-radius: 1.4vmin;
 }
 
 .clock-block #clock {
@@ -71,16 +86,33 @@ html, body {
 
 .stats-block {
   display: flex;
-  gap: 5vmin;
+  gap: 2.2vmin;
   text-align: left;
 }
 
-.stat { display: flex; flex-direction: column; align-items: flex-end; }
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 1.3vmin;
+  padding: 1.4vmin 2.2vmin;
+  border-radius: 1.4vmin;
+}
+
+.stat-icon {
+  font-size: 2.8vmin;
+  line-height: 1;
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5vmin;
+}
 
 .stat-label {
   font-size: 1.9vmin;
   color: var(--text-muted);
-  margin-bottom: 0.6vmin;
 }
 
 .stat-value {
@@ -107,7 +139,23 @@ html, body {
   height: 52vmin;
 }
 
-#ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+/* עדשת זכוכית עדינה מאחורי הטקסט — מעניקה עומק לעיגול */
+.ring-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 11%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.05), transparent 75%);
+}
+
+#ring {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  filter: drop-shadow(0 0 2.4vmin rgba(237, 161, 0, 0.35));
+}
 
 .ring-track {
   fill: none;
@@ -128,6 +176,7 @@ html, body {
 .ring-inner {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -143,11 +192,38 @@ html, body {
   letter-spacing: 0.08em;
 }
 
+/* מספר הכסף — גדול, ומתחלף בין TV (vmin) לטלפון (px) לפי הקונטיינר */
 .hero {
-  font-size: 7.4vmin;
-  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.15em;
+  font-size: 7.6vmin;
   line-height: 1.05;
   white-space: nowrap;
+}
+
+.money-cur {
+  font-size: 0.5em;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.money-num {
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* גוון זהב על הספרות — כשהדפדפן תומך; נופל בחזרה לטקסט לבן רגיל */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .money-num {
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent-deep));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
 }
 
 .percent {
@@ -180,8 +256,9 @@ html, body {
 }
 
 .ms-dot {
-  width: 2.2vmin;
-  height: 2.2vmin;
+  position: relative;
+  width: 2.4vmin;
+  height: 2.4vmin;
   border-radius: 50%;
   background: var(--grid);
   border: 0.35vmin solid var(--baseline);
@@ -193,6 +270,18 @@ html, body {
   background: var(--accent);
   border-color: var(--accent-bright);
   box-shadow: 0 0 1.6vmin rgba(237, 161, 0, 0.55);
+}
+
+.ms.done .ms-dot::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3vmin;
+  font-weight: 700;
+  color: #1a1200;
 }
 
 .ms.current .ms-dot {
@@ -210,14 +299,15 @@ html, body {
 .ms::before {
   content: "";
   position: absolute;
-  top: 0.95vmin;
+  top: 1.05vmin;
   left: 50%;
   width: 100%;
-  height: 0.35vmin;
+  height: 0.4vmin;
+  border-radius: 0.2vmin;
   background: var(--grid);
 }
 .ms:first-child::before { display: none; }
-.ms.done::before { background: var(--accent-deep); }
+.ms.done::before { background: linear-gradient(to left, var(--accent-deep), var(--accent-bright)); }
 
 .ms-label {
   font-size: 1.9vmin;
@@ -227,7 +317,7 @@ html, body {
 .ms.done .ms-label { color: var(--text-secondary); }
 .ms.current .ms-label { color: var(--accent-bright); }
 
-.ms-star { font-size: 1.7vmin; line-height: 1; margin-top: -0.4vmin; }
+.ms-star { font-size: 2.4vmin; line-height: 1; margin-top: -0.2vmin; }
 
 /* ---- שורה תחתונה: גרף + ציטוט ---- */
 
@@ -240,14 +330,22 @@ html, body {
 
 .spark-card {
   position: relative;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 1.4vmin;
-  padding: 1.6vmin 2vmin;
-  width: 38vmin;
+  border-radius: 1.6vmin;
+  padding: 1.8vmin 2.2vmin;
+  width: 40vmin;
   min-width: 30vmin;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.spark-card::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-bright), transparent);
+  opacity: 0.6;
 }
 
 .spark-title {
@@ -274,6 +372,7 @@ html, body {
 .spark-tip .tip-date { color: var(--text-muted); font-size: 1.5vmin; }
 
 .quote-block {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -283,7 +382,18 @@ html, body {
   gap: 1.2vmin;
 }
 
+.quote-mark {
+  position: absolute;
+  top: -2vmin;
+  font-size: 9vmin;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
 .quote {
+  position: relative;
   font-size: 2.9vmin;
   color: var(--text-secondary);
   font-weight: 500;
@@ -335,10 +445,16 @@ html, body {
 #edit {
   max-width: 480px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding-top: max(24px, env(safe-area-inset-top));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  padding-bottom: calc(48px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background:
+    radial-gradient(120vw 40vh at 50% 0%, #201a10 0%, transparent 60%),
+    var(--page);
 }
 
 .edit-header { text-align: center; padding: 16px 0 4px; }
@@ -346,8 +462,11 @@ html, body {
 .edit-label { color: var(--text-muted); font-size: 15px; }
 
 .edit-total {
-  font-size: 44px;
-  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.15em;
+  font-size: clamp(34px, 11vw, 44px);
   margin: 6px 0 4px;
 }
 
@@ -365,14 +484,27 @@ html, body {
   width: 0;
   border-radius: 5px;
   background: linear-gradient(to left, #c98500, #f5c04e);
+  box-shadow: 0 0 12px rgba(237, 161, 0, 0.45);
   transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .card {
-  background: var(--surface);
+  position: relative;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)), var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-bright), transparent);
+  opacity: 0.5;
 }
 
 .card h2 { font-size: 16px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600; }
@@ -432,10 +564,16 @@ button.primary {
   border: none;
   border-radius: 10px;
   cursor: pointer;
+  box-shadow: 0 8px 24px rgba(237, 161, 0, 0.25);
+  transition: transform 0.15s, box-shadow 0.15s;
 }
-button.primary:active { transform: scale(0.98); }
+button.primary:active { transform: scale(0.98); box-shadow: 0 4px 12px rgba(237, 161, 0, 0.2); }
 
-.entries { list-style: none; }
+.entries {
+  list-style: none;
+  max-height: 340px;
+  overflow-y: auto;
+}
 
 .entry {
   display: flex;
@@ -454,13 +592,21 @@ button.primary:active { transform: scale(0.98); }
 .entry-delta.neg { color: var(--danger); }
 
 .entry-del {
-  background: none;
+  background: rgba(255, 255, 255, 0.04);
   border: none;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 15px;
   cursor: pointer;
-  padding: 8px;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
 }
+.entry-del:active { background: rgba(208, 59, 59, 0.15); color: var(--danger); }
 
 .entries-empty { color: var(--text-muted); font-size: 14px; text-align: center; padding: 8px 0; }
 
@@ -468,7 +614,12 @@ button.primary:active { transform: scale(0.98); }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 4px;
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
   font-size: 14px;
 }
 .edit-footer a { color: var(--accent-bright); text-decoration: none; }
+
+@media (max-width: 360px) {
+  #edit { padding-left: 12px; padding-right: 12px; }
+  .card { padding: 14px; }
+}
