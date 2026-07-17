@@ -14,7 +14,7 @@ window.APP_CONFIG = {
   // מזהה סודי של הנתונים שלך — משמש כמפתח באחסון.
   // חובה להחליף למחרוזת אקראית ארוכה משלך (לפחות 8 תווים,
   // אותיות/מספרים/מקפים). ליצירה: openssl rand -hex 16
-  dataId: "CHANGE-ME-to-a-long-random-string",
+  dataId: "d83f14dd5a3970db57b68d6d2da08384",
 
   // הסנכרון עובד אוטומטית כשהאתר רץ על Vercel עם Upstash Redis
   // מחובר (ראה SETUP.md) — אין כאן שום דבר למלא.
