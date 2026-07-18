@@ -131,6 +131,53 @@
     }
   }
 
+  /* ---------- מצב אורחים: הסתרת המסך מרחוק ---------- */
+
+  const PRIVACY_LOCAL_KEY = "onemill-privacy";
+  let privacyHidden = false;
+  let applyPrivacy = () => {};
+  let privacyStore = null;
+
+  async function initPrivacyStore() {
+    const apiUrl = "/api/flag?id=" + encodeURIComponent(cfg.dataId);
+    try {
+      const r = await fetch(apiUrl, { cache: "no-store" });
+      if (!r.ok) throw new Error("flag " + r.status);
+      const state = await r.json();
+      applyPrivacy(!!state.hidden);
+      setInterval(async () => {
+        try {
+          const r2 = await fetch(apiUrl, { cache: "no-store" });
+          if (!r2.ok) return;
+          const s2 = await r2.json();
+          applyPrivacy(!!s2.hidden);
+        } catch { /* ננסה שוב בפעימה הבאה */ }
+      }, 4000);
+      return {
+        setHidden(hidden) {
+          applyPrivacy(hidden);
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ hidden }),
+          }).catch(() => {});
+        },
+      };
+    } catch {
+      // אין /api בהרצה מקומית — נופל למצב מקומי (אותו דפדפן בלבד, לבדיקות)
+      applyPrivacy(localStorage.getItem(PRIVACY_LOCAL_KEY) === "1");
+      window.addEventListener("storage", (ev) => {
+        if (ev.key === PRIVACY_LOCAL_KEY) applyPrivacy(ev.newValue === "1");
+      });
+      return {
+        setHidden(hidden) {
+          localStorage.setItem(PRIVACY_LOCAL_KEY, hidden ? "1" : "0");
+          applyPrivacy(hidden);
+        },
+      };
+    }
+  }
+
   /* ---------- חישובים ---------- */
 
   function currentTotal() {
@@ -469,8 +516,12 @@
 
   function tickClock() {
     const now = new Date();
-    $("clock").textContent = now.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
-    $("date").textContent = fmtDate.format(now);
+    const t = now.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+    const d = fmtDate.format(now);
+    $("clock").textContent = t;
+    $("date").textContent = d;
+    $("privacy-clock").textContent = t;
+    $("privacy-date").textContent = d;
   }
 
   let quoteIdx = -1;
@@ -508,7 +559,7 @@
     const total = currentTotal();
     if (prevTotal !== null && total > prevTotal) {
       const crossed = crossedMilestone(prevTotal, total);
-      if (crossed) celebrate(crossed);
+      if (crossed && !privacyHidden) celebrate(crossed);
     }
     prevTotal = total;
     if (mode === "tv") renderTV();
@@ -524,9 +575,28 @@
     setInterval(tickQuote, 30000);
     setInterval(tickDrift, 90000);
     window.addEventListener("resize", drawSpark);
+
+    applyPrivacy = (hidden) => {
+      privacyHidden = hidden;
+      $("privacy-screen").classList.toggle("hidden", !hidden);
+    };
   } else {
     setupEditForm();
+
+    const toggleBtn = $("privacy-toggle");
+    const toggleIcon = $("privacy-toggle-icon");
+    applyPrivacy = (hidden) => {
+      privacyHidden = hidden;
+      toggleBtn.classList.toggle("active", hidden);
+      toggleBtn.setAttribute("aria-pressed", String(hidden));
+      toggleIcon.textContent = hidden ? "🙉" : "🙈";
+    };
+    toggleBtn.addEventListener("click", () => {
+      if (privacyStore) privacyStore.setHidden(!privacyHidden);
+    });
   }
+
+  initPrivacyStore().then((store) => { privacyStore = store; });
 
   // ?demo=1 — נתונים לדוגמה לתצוגה מקדימה (לא נשמרים)
   if (params.get("demo")) {

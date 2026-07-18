@@ -74,10 +74,17 @@
     <div id="celebrate" class="celebrate hidden">
       <div class="celebrate-text" id="celebrate-text"></div>
     </div>
+    <div id="privacy-screen" class="privacy-screen hidden">
+      <div class="privacy-clock" id="privacy-clock">--:--</div>
+      <div class="privacy-date" id="privacy-date"></div>
+    </div>
   </div>
 
   <!-- ================= תצוגת עריכה (טלפון) ================= -->
   <div id="edit" class="view hidden">
+    <button id="privacy-toggle" class="privacy-toggle" type="button" aria-pressed="false" title="מצב אורחים — מסתיר את המסך בטלוויזיה">
+      <span id="privacy-toggle-icon">🙈</span>
+    </button>
     <header class="edit-header">
       <div class="edit-label">נחסך עד היום</div>
       <div class="edit-total"><span class="money-cur">₪</span><span id="edit-total-value" class="money-num">0</span></div>

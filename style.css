@@ -442,6 +442,37 @@ html, body {
   z-index: 50;
 }
 
+/* ---- מצב אורחים — שעון אווירתי שמסתיר את היעד ---- */
+
+.privacy-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2vmin;
+  background: radial-gradient(90vmin 70vmin at 50% 45%, #201a10 0%, var(--page) 70%);
+}
+
+.privacy-clock {
+  font-size: 16vmin;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
+  filter: drop-shadow(0 0 3vmin rgba(237, 161, 0, 0.25));
+}
+
+.privacy-date {
+  font-size: 3vmin;
+  color: var(--text-secondary);
+}
+
 /* ============================================================
    תצוגת עריכה (טלפון)
    ============================================================ */
@@ -622,6 +653,32 @@ button.primary:active { transform: scale(0.98); box-shadow: 0 4px 12px rgba(237,
   font-size: 14px;
 }
 .edit-footer a { color: var(--accent-bright); text-decoration: none; }
+
+/* כפתור מצב אורחים — צף וקבוע, כדי שיהיה נגיש מיידית בלי לגלול */
+.privacy-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  z-index: 20;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  font-size: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.privacy-toggle:active { transform: scale(0.94); }
+.privacy-toggle.active {
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent-bright));
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(237, 161, 0, 0.4);
+}
 
 @media (max-width: 360px) {
   #edit { padding-left: 12px; padding-right: 12px; }
