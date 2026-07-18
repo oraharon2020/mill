@@ -329,6 +329,7 @@ html, body {
 .tv-bottom {
   display: grid;
   grid-template-columns: 40vmin 1fr 40vmin;
+  grid-template-rows: 100%;   /* מונע מהשורה "לתפוח" לפי גובה התוכן (ברירת המחדל של גריד) */
   align-items: stretch;
   gap: 3vmin;
   height: 17vmin;
@@ -337,6 +338,7 @@ html, body {
 .spark-card {
   position: relative;
   width: 100%;
+  min-height: 0;   /* עוקף את min-height:auto שגריד מפעיל כברירת מחדל על הפריטים שלו */
   border-radius: 1.6vmin;
   padding: 1.8vmin 2.2vmin;
   display: flex;
@@ -378,12 +380,15 @@ html, body {
 
 .quote-block {
   position: relative;
+  min-height: 0;   /* עוקף את min-height:auto שגריד מפעיל כברירת מחדל על הפריטים שלו */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
   gap: 1.2vmin;
+  overflow: hidden;
 }
 
 .quote-mark {
