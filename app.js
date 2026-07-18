@@ -316,11 +316,12 @@
 
     const fontPx = Math.max(10, Math.round(H * 0.13)); // קריא גם מרחוק
     const padY = 8, padL = 4, padR = fontPx * 4; // מקום לתווית ערך אחרונה בצד
-    const times = entries.map((e) => new Date(e.date).getTime());
     const vals = entries.map((e) => e.total);
-    const t0 = Math.min(...times), t1 = Math.max(...times);
     const v0 = Math.min(...vals) * 0.97, v1 = Math.max(...vals) * 1.03 || 1;
-    const x = (t) => t1 === t0 ? W / 2 : padL + ((t - t0) / (t1 - t0)) * (W - padL - padR);
+    // מרווח לפי סדר העדכונים (לא לפי זמן בפועל) — כי התאריך הוא ברמת יום
+    // בלבד, ושני עדכונים באותו יום היו הופכים את כל הציר לנקודה אחת
+    const n = entries.length;
+    const x = (i) => n <= 1 ? W / 2 : padL + (i / (n - 1)) * (W - padL - padR);
     const y = (v) => H - padY - ((v - v0) / (v1 - v0)) * (H - 2 * padY);
 
     const NS = "http://www.w3.org/2000/svg";
@@ -347,7 +348,7 @@
       svg.appendChild(gl);
     }
 
-    const pts = entries.map((e) => ({ px: x(new Date(e.date).getTime()), py: y(e.total), e }));
+    const pts = entries.map((e, i) => ({ px: x(i), py: y(e.total), e }));
     sparkPts = pts;
 
     if (pts.length >= 2) {
