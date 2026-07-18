@@ -45,6 +45,8 @@ html, body {
 #tv-drift {
   position: relative;
   height: 100%;
+  max-width: 178vh;   /* עוגן פרופורציית 16:9 — מונע מהתוכן להימתח ולהתפזר על מסכים רחבים במיוחד */
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   padding: 3.5vmin 4vmin;
@@ -321,8 +323,12 @@ html, body {
 
 /* ---- שורה תחתונה: גרף + ציטוט ---- */
 
+/* גריד בן 3 עמודות: הגרף בעמודה 1 (ימין, ב-RTL), הציטוט תמיד ממורכז
+   בעמודה 2 — עמודה 3 נשארת ריקה בכוונה כדי לאזן את רוחב הגרף, כך
+   שהציטוט ממורכז ביחס למסך כולו ולא ביחס לשטח שנשאר אחרי כרטיס הגרף */
 .tv-bottom {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40vmin 1fr 40vmin;
   align-items: stretch;
   gap: 3vmin;
   height: 17vmin;
@@ -330,10 +336,9 @@ html, body {
 
 .spark-card {
   position: relative;
+  width: 100%;
   border-radius: 1.6vmin;
   padding: 1.8vmin 2.2vmin;
-  width: 40vmin;
-  min-width: 30vmin;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -373,7 +378,6 @@ html, body {
 
 .quote-block {
   position: relative;
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
