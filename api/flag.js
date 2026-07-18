@@ -1,9 +1,7 @@
-// GET  /api/flag?id=XXX  → { hidden, until }
+// GET  /api/flag?id=XXX  → { hidden }
 // POST /api/flag?id=XXX  → { hidden: true|false }  (גוף הבקשה)
-// "מצב אורחים": כשמישהו בחדר, מהטלפון מסתירים את המסך לזמן קצוב.
+// "מצב אורחים": כשמישהו בחדר, מהטלפון מסתירים את המסך עד לביטול ידני.
 // אותו אחסון (Upstash Redis) כמו api/data.js, במפתח נפרד.
-
-const AUTO_REVERT_MS = 3 * 60 * 60 * 1000; // 3 שעות — רשת ביטחון אם שוכחים להחזיר
 
 module.exports = async (req, res) => {
   const base =
@@ -25,18 +23,13 @@ module.exports = async (req, res) => {
   if (req.method === "GET") {
     const r = await fetch(`${base}/get/${key}`, { headers: auth });
     const j = await r.json();
-    const state = j.result ? JSON.parse(j.result) : { hidden: false, until: null };
-    if (state.hidden && state.until && Date.now() > state.until) {
-      state.hidden = false;
-      state.until = null;
-    }
+    const state = j.result ? JSON.parse(j.result) : { hidden: false };
     res.setHeader("Cache-Control", "no-store");
     return res.status(200).json(state);
   }
 
   if (req.method === "POST") {
-    const hidden = !!(req.body && req.body.hidden);
-    const state = { hidden, until: hidden ? Date.now() + AUTO_REVERT_MS : null };
+    const state = { hidden: !!(req.body && req.body.hidden) };
     const r = await fetch(`${base}/set/${key}`, {
       method: "POST",
       headers: auth,
